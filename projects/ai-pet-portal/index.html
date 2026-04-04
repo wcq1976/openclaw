@@ -299,11 +299,11 @@ async function startGeneration(){
   if(!selectedStyleId||!uploadedImageBase64)return;
   showStep2();
   try{
-    var result=await generateImage(uploadedImageBase64,selectedStyleId);
-    generatedImageUrl=result;
-    document.getElementById("resultImg").src=result;
+    var data=await generateImage(uploadedImageBase64,selectedStyleId);
+    generatedImageUrl=data.image;
+    document.getElementById("resultImg").src=data.image;
     addUsage();
-    showPaywall(result);
+    showPaywall(data.image);
   }catch(err){
     console.error("Generation error:",err);
     alert("生成失败: "+err.message+"
@@ -332,7 +332,7 @@ async function generateImage(base64Image,styleId){
   if(choices&&choices[0]&&choices[0].message&&choices[0].message.content){
     var items=choices[0].message.content;
     for(var i=0;i<items.length;i++){
-      if(items[i].image){return items[i].image}
+      if(items[i].image){return {image: items[i].image, full: data}}
     }
   }
   throw new Error("Unexpected API response format");
