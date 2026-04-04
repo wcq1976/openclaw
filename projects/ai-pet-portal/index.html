@@ -386,27 +386,24 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
 
 
 // Countdown timer for paywall
-function startTimer(duration, display){
-  var timer = duration, minutes, seconds;
-  var interval = setInterval(function(){
-    minutes = parseInt(timer / 60, 10);
-    seconds = parseInt(timer % 60, 10);
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-    display.textContent = minutes + ":" + seconds;
-    if (--timer < 0) {
-      clearInterval(interval);
-      display.textContent = "00:00";
-    }
-  }, 1000);
+var timerInterval;
+function startTimer(){
+  if(timerInterval) clearInterval(timerInterval);
+  t = 300;
+  timerInterval = setInterval(function(){
+    if(t<=0) return;
+    t--;
+    var m = String(Math.floor(t/60)).padStart(2,'0');
+    var s = String(t%60).padStart(2,'0');
+    var el = document.getElementById("timer");
+    if(el) el.innerText = m+":"+s;
+  },1000);
 }
 
 function showPaywall(imgUrl){
   document.getElementById("previewPaywall").src = imgUrl;
   document.getElementById("paywallModal").style.display = "flex";
-  // Start 5 minute countdown timer
-  var timerDisplay = document.getElementById("timer");
-  if(timerDisplay) startTimer(300, timerDisplay);
+  startTimer();
 }
 
 // Usage tracking
