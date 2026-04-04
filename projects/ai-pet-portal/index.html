@@ -170,7 +170,9 @@ a{text-decoration:none}
 </style>
 </head>
 <body>
-<nav class="navbar"><div class="container"><a href="#" class="logo">AI Pet <span>Studio</span></a><ul class="nav-links"><li><a href="#styles">艺术风格</a></li><li><a href="#how">如何使用</a></li><li><a href="#features">为什么选择</a></li><li><a href="#faq">常见问题</a></li><li><a href="#" class="nav-cta" onclick="openModal();return false;">立即生成</a></li></ul></div></nav>
+<nav class="navbar"><div class="container"><a href="#" class="logo">AI Pet <span>Studio</span></a><ul class="nav-links" id="creditsDisplay">
+  <li style="color:#8B5CF6;font-weight:bold">🎁 Credits: <span id="navCredits">0</span></li>
+</ul><li><a href="#styles">艺术风格</a></li><li><a href="#how">如何使用</a></li><li><a href="#features">为什么选择</a></li><li><a href="#faq">常见问题</a></li><li><a href="#" class="nav-cta" onclick="openModal();return false;">立即生成</a></li></ul></div></nav>
 <section class="hero"><div class="container"><div class="hero-grid"><div class="hero-text"><h1>把你的宠物变成<br><span class="gradient-text">艺术明星 ✨</span></h1><p>上传宠物照片，选择喜欢的艺术风格，AI 在 2 分钟内为你生成专业级宠物艺术照。12+ 种风格可选，完全免费！</p><div class="hero-badges"><span class="badge"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg> 无需注册</span><span class="badge"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 2分钟完成</span><span class="badge"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> 12+ 风格</span><span class="badge"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/></svg> 免费下载</span></div><div class="upload-zone" id="heroUpload" onclick="document.getElementById('fileInput').click()"><div class="icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div><h3>上传宠物照片</h3><p>拖拽照片到此处，或点击选择文件</p><div class="formats"><span class="format-tag">JPG</span><span class="format-tag">PNG</span><span class="format-tag">WEBP</span></div></div></div><div class="hero-visual"><div class="hero-gallery" id="heroGallery"></div></div></div></div></section>
 <div class="stats-bar"><div class="container"><div class="stats-grid"><div class="stat-item"><h3>50万+</h3><p>成功生成艺术照</p></div><div class="stat-item"><h3>12+</h3><p>精选艺术风格</p></div><div class="stat-item"><h3>~2分钟</h3><p>平均生成时间</p></div><div class="stat-item"><h3>100%</h3><p>免费无水印</p></div></div></div></div>
 <section class="section" id="styles"><div class="container"><div class="section-header"><span class="section-label">✨ 艺术风格</span><h2>12 种艺术风格，任你挑选</h2><p>每种风格都经过专门优化，为你的宠物打造专属艺术效果</p></div><div class="style-grid" id="styleGrid"></div></div></section>
@@ -297,6 +299,13 @@ function updateGenerateBtn(){
 
 async function startGeneration(){
   if(!selectedStyleId||!uploadedImageBase64)return;
+  // Check credits (free users have 0 credits, can generate 1 free then paywall)
+  if(getCredits()<=0 && useCredit()===false){
+    // Show paywall instead of generating
+    alert("请先分享获取免费次数！🎁");
+    copyInvite();
+    return;
+  }
   showStep2();
   try{
     var data=await generateImage(uploadedImageBase64,selectedStyleId);
@@ -385,6 +394,46 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
 });
 
 
+
+// ====== Credits & Referral System ======
+function getCredits(){return Number(localStorage.getItem("credits")||0);}
+function addCredits(n){localStorage.setItem("credits",getCredits()+n);updateCreditsDisplay();}
+function useCredit(){if(getCredits()>0){addCredits(-1);return true;}return false;}
+function getUid(){
+  var uid=localStorage.getItem("uid");
+  if(!uid){uid=crypto.randomUUID();localStorage.setItem("uid",uid);}
+  return uid;
+}
+function getInviteLink(){return location.origin+location.pathname+"?ref="+getUid();}
+function copyInvite(){
+  const link=getInviteLink();
+  navigator.clipboard.writeText(link).then(function(){
+    alert("Invite link copied! Share with friends 🎉");
+  });
+}
+function share(type){
+  const link=encodeURIComponent(getInviteLink());
+  const text=encodeURIComponent("Turn your pet into AI art 😱");
+  if(type==="whatsapp"){window.open("https://wa.me/?text="+text+"%20"+link);}
+  if(type==="twitter"){window.open("https://twitter.com/intent/tweet?text="+text+"&url="+link);}
+  if(type==="copy"){copyInvite();}
+}
+function checkReferral(){
+  const params=new URLSearchParams(location.search);
+  const ref=params.get("ref");
+  if(!ref)return;
+  const myId=getUid();
+  if(ref===myId)return;
+  const used=localStorage.getItem("ref_used");
+  if(used===ref)return;
+  localStorage.setItem("ref_used",ref);
+  addCredits(2);
+  alert("🎉 You got 2 free credits!");
+}
+// Check referral on page load
+checkReferral();
+updateCreditsDisplay();
+
 // Countdown timer for paywall
 var timerInterval;
 function startTimer(){
@@ -445,7 +494,11 @@ function buySingle(){
  </div>
  <div style="display:flex;gap:10px">
  <button onclick="buySingle()" style="flex:1;padding:10px;border-radius:10px;border:1px solid #ddd;background:#fff;cursor:pointer">$2.99 Single</button>
- <button onclick="closePaywall()" style="flex:1;padding:10px;border-radius:10px;border:none;background:#eee;cursor:pointer">Maybe later</button>
+ <div style="margin-top:8px"><small>🎁 Share & get 2 free credits:</small><br>
+  <button onclick="share('whatsapp')" style="flex:1;padding:8px;border-radius:8px;border:none;background:#25D366;color:#fff;cursor:pointer;margin-top:4px">📱 WhatsApp</button>
+  <button onclick="share('twitter')" style="flex:1;padding:8px;border-radius:8px;border:none;background:#1DA1F2;color:#fff;cursor:pointer;margin-top:4px">🐦 Twitter</button>
+  <button onclick="share('copy')" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;margin-top:4px">📋 Copy Link</button></div>
+  <button onclick="closePaywall()" style="flex:1;padding:10px;border-radius:10px;border:none;background:#eee;cursor:pointer;margin-top:8px">Maybe later</button>
  </div>
  <p style="font-size:12px;color:#999;margin-top:10px">Secure payment powered by Stripe</p>
  </div>
