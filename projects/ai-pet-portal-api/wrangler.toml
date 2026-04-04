@@ -1,0 +1,14 @@
+name = "ai-pet-portal-api"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# KV Namespace for usage data
+kv_namespaces = [
+  { binding = "AI_PET_USAGE", id = "YOUR_KV_NAMESPACE_ID" }
+]
+
+# 可选: 绑定 D1 数据库
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "ai-pet-usage"
+# database_id = "YOUR_D1_DATABASE_ID"
