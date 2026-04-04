@@ -302,6 +302,7 @@ async function startGeneration(){
     var result=await generateImage(uploadedImageBase64,selectedStyleId);
     generatedImageUrl=result;
     document.getElementById("resultImg").src=result;
+    addUsage();
     showPaywall(result);
   }catch(err){
     console.error("Generation error:",err);
@@ -387,6 +388,21 @@ function showPaywall(imgUrl){
   document.getElementById("previewPaywall").src = imgUrl;
   document.getElementById("paywallModal").style.display = "flex";
 }
+
+// Usage tracking
+function addUsage(){
+  // Send to your analytics endpoint
+  fetch('https://api.chaoqunwu47.workers.dev/usage', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      event: 'image_generated',
+      style: selectedStyleId,
+      timestamp: new Date().toISOString()
+    })
+  }).catch(function(){}); // Ignore errors
+}
+
 function closePaywall(){
   document.getElementById("paywallModal").style.display = "none";
 }
