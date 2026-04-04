@@ -384,9 +384,29 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
   });
 });
 
+
+// Countdown timer for paywall
+function startTimer(duration, display){
+  var timer = duration, minutes, seconds;
+  var interval = setInterval(function(){
+    minutes = parseInt(timer / 60, 10);
+    seconds = parseInt(timer % 60, 10);
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+    display.textContent = minutes + ":" + seconds;
+    if (--timer < 0) {
+      clearInterval(interval);
+      display.textContent = "00:00";
+    }
+  }, 1000);
+}
+
 function showPaywall(imgUrl){
   document.getElementById("previewPaywall").src = imgUrl;
   document.getElementById("paywallModal").style.display = "flex";
+  // Start 5 minute countdown timer
+  var timerDisplay = document.getElementById("timer");
+  if(timerDisplay) startTimer(300, timerDisplay);
 }
 
 // Usage tracking
@@ -417,6 +437,7 @@ function buySingle(){
 <div id="paywallModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:center">
  <div style="width:360px;background:#fff;border-radius:20px;padding:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease">
  <h2 style="margin-bottom:8px">😱 Your pet looks AMAZING</h2>
+ <p style="color:red;font-size:13px;margin-bottom:8px">⏳ Limited offer: expires in <span id="timer">05:00</span></p>
  <p style="color:#666;font-size:14px;margin-bottom:16px">Unlock HD version + remove watermark</p>
  <img id="previewPaywall" style="width:100%;border-radius:12px;margin-bottom:16px"/>
  <div style="background:#f9f9f9;border-radius:12px;padding:12px;margin-bottom:12px">
